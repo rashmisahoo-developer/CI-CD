@@ -27,6 +27,12 @@ jobs:
       - name: Restore NuGet packages
         run: nuget restore
 
+      - name: Inject the code
+        run: |
+          [xml]$doc = Get-Content .\Web.config
+          $doc.configuration.appSettings.add | Where-Object {$_.key -eq "NAME"} | foreach-object { $_.value = "${{vars.NAME}}" }
+          $doc.Save(".\Web.config")
+
       - name: Publish to folder
         run: msbuild /nologo /verbosity:m /t:Build /t:pipelinePreDeployCopyAllFilesToOneFolder /p:_PackageTempDir="\published\"
 
